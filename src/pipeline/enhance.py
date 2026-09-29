@@ -58,13 +58,11 @@ def image_reconstruct(marker: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
    return reconstructed
 
-def morphological_reconstruction(base: np.ndarray, e: dict) -> np.ndarray:
-    # invert
-    inv = 255 - base  
+def morphological_reconstruction(mask: np.ndarray, e: dict) -> np.ndarray:
     # erode the inverted image to create a marker
-    marker = cv2.erode(inv, np.ones((e["erode_size"], e["erode_size"]), np.uint8), iterations=1)
+    marker = cv2.erode(mask, np.ones((e["erode_size"], e["erode_size"]), np.uint8), iterations=1)
     # reconstruct
-    reconstructed = image_reconstruct(marker, inv)
+    reconstructed = image_reconstruct(marker, mask)
 
 
     return reconstructed
