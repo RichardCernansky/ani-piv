@@ -3,6 +3,7 @@ import numpy as np
 from collections import deque
 
 def enhance_img():
+    
     return
 
 
@@ -16,8 +17,8 @@ def image_reconstruct(marker: np.ndarray, mask: np.ndarray) -> np.ndarray:
    Perform morphological reconstruction by dilation.
 
    Parameters:
-       marker (np.ndarray): The marker image (seed).
-       mask (np.ndarray): The mask image (constraint).
+       marker (np.ndarray): The marker image (seed), eroded inverted input.
+       mask (np.ndarray): The mask image (constraint), inverted input.
 
    Returns:
        np.ndarray: Reconstructed image.
@@ -49,10 +50,21 @@ def image_reconstruct(marker: np.ndarray, mask: np.ndarray) -> np.ndarray:
        for dr, dc in neighbors:
            rr, cc = p.row + dr, p.col + dc
            if 0 <= rr < rows and 0 <= cc < cols:
-               new_val = min(mask[rr, cc], max(reconstructed[rr, cc], reconstructed[p.row, p.col]))
+
+               new_val = min(mask[rr, cc], max(reconstructed[rr, cc], reconstructed[p.row, p.col])) # 1. max - set the neighbor pixel according to the current pixel value, 2. min - make sure it does not exceed the mask value
                if new_val > reconstructed[rr, cc]:
                    reconstructed[rr, cc] = new_val
                    q.append(Pixel(rr, cc))
 
    return reconstructed
 
+def morphological_reconstruction(base: np.ndarray, e: dict) -> np.ndarray:
+    # invert
+    inv = 255 - base  
+    # erode the inverted image to create a marker
+    marker = cv2.erode(inv, np.ones((e["erode_size"], e["erode_size"]), np.uint8), iterations=1)
+    # reconstruct
+    reconstructed = image_reconstruct(marker, inv)
+
+
+    return reconstructed
